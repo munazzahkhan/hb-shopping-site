@@ -60,20 +60,6 @@ def show_melon(melon_id):
 def show_shopping_cart():
     """Display content of shopping cart."""
 
-    shopping_cart = session["cart"]
-    total_cost = 0
-
-
-    for melon_id, quantity in shopping_cart.items():
-        melon = melons.get_by_id(melon_id)
-        # melon.price = melon.price_str()
-        # melon.quantity = 
-        total_price = melon.price * quantity
-        total_cost += total_price
-
-
-
-    print(total_cost)
     # The logic here will be something like:
     #
     # - get the cart dictionary from the session
@@ -90,7 +76,21 @@ def show_shopping_cart():
     # Make sure your function can also handle the case wherein no cart has
     # been added to the session
 
-    return render_template("cart.html" , total_cost = cart_total, shopping_cart=shopping_cart_items, )
+    shopping_cart = session["cart"]
+    total_cost = 0
+    melon_list = []
+
+    for melon_id, quantity in shopping_cart.items():
+        melon = melons.get_by_id(melon_id)
+        # melon.price = melon.price_str()
+        # melon.quantity = 
+        total_price = melon.price * quantity
+        total_cost += total_price
+        melon.quantity = quantity
+        melon.total_price = total_price
+        melon_list.append(melon)
+
+    return render_template("cart.html" , total_cost = total_cost, melon_list = melon_list )
 
 
 @app.route("/add_to_cart/<melon_id>")
@@ -107,6 +107,10 @@ def add_to_cart(melon_id):
     #
     # - check if a "cart" exists in the session, and create one (an empty
     #   dictionary keyed to the string "cart") if not
+     # - check if the desired melon id is the cart, and if not, put it in
+    # - increment the count for that melon id by 1
+    # - flash a success message
+    # - redirect the user to the cart page
    
     if "cart" not in session:
         session["cart"] = {}
@@ -114,10 +118,7 @@ def add_to_cart(melon_id):
     session["cart"][melon_id] = session["cart"].get(melon_id, 0) + 1
     flash(f"{melon_id} was added to the cart.")
 
-    # - check if the desired melon id is the cart, and if not, put it in
-    # - increment the count for that melon id by 1
-    # - flash a success message
-    # - redirect the user to the cart page
+   
     print(session["cart"])
     return redirect("/cart")
 
